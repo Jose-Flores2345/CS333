@@ -3,6 +3,9 @@ import pygame
 from additions import draw_board, draw_pieces, check_options
 from additions import check_king, check_queen, check_bishop, check_rook, check_pawn, check_knight
 from additions import check_valid_moves, draw_valid, draw_captured, draw_check
+from chess.additions import winner
+
+
 class TestChessIntegration(unittest.TestCase):
 
     def setUp(self):
@@ -105,6 +108,85 @@ class TestChessIntegration(unittest.TestCase):
             draw_captured()
         def test_draw_check_integration(self):
             draw_check()
+
+        from unittest.mock import MagicMock
+
+        # Mocking pygame functions for the purpose of testing
+        pygame.draw = MagicMock()
+        pygame.blit = MagicMock()
+        pygame.mouse = MagicMock()
+
+        # Mocking game state
+        turn_step = 0
+        white_locations = [(1, 0), (3, 0), (5, 0), (7, 0), (0, 1), (2, 1), (4, 1), (6, 1)]
+        black_locations = [(0, 7), (2, 7), (4, 7), (6, 7), (1, 6), (3, 6), (5, 6), (7, 6)]
+        white_pieces = ['pawn', 'pawn', 'pawn', 'pawn', 'rook', 'knight', 'bishop', 'queen']
+        black_pieces = ['pawn', 'pawn', 'pawn', 'pawn', 'rook', 'knight', 'bishop', 'queen']
+        white_moved = [False, False, False, False, False, False, False, False]
+        black_moved = [False, False, False, False, False, False, False, False]
+        check = False
+        font = MagicMock()
+
+        # Mocking screen
+        screen = MagicMock()
+
+        def draw_game_over():
+            pass  # Mocking the function for testing purposes
+
+        def check_ep(old_coords, new_coords):
+            pass  # Mocking the function for testing purposes
+
+        def check_castling():
+            pass  # Mocking the function for testing purposes
+
+        def draw_castling(moves):
+            pass  # Mocking the function for testing purposes
+
+        def check_promotion():
+            pass  # Mocking the function for testing purposes
+
+        def draw_promotion():
+            pass  # Mocking the function for testing purposes
+
+        class TestChessFunctions(unittest.TestCase):
+
+            def test_draw_game_over(self):
+                draw_game_over()
+                pygame.draw.rect.assert_called_once()
+                pygame.blit.assert_any_call(font.render(f'{winner} won the game!', True, 'white'), (210, 210))
+                pygame.blit.assert_any_call(font.render(f'Press ENTER to Restart!', True, 'white'), (210, 240))
+
+            def test_check_ep(self):
+                old_coords = (0, 1)
+                new_coords = (0, 3)
+                ep_coords = check_ep(old_coords, new_coords)
+                self.assertEqual(ep_coords, (0, 2))
+
+            def test_check_castling(self):
+                castle_moves = check_castling()
+                self.assertEqual(castle_moves, [])
+
+            def test_draw_castling(self):
+                moves = [((4, 0), (7, 0)), ((4, 0), (0, 0))]
+                draw_castling(moves)
+                pygame.draw.circle.assert_any_call(screen, 'red', (7 * 100 + 50, 0 * 100 + 70), 8)
+                pygame.blit.assert_any_call(font.render('king', True, 'black'), (7 * 100 + 30, 0 * 100 + 70))
+                pygame.draw.circle.assert_any_call(screen, 'red', (0 * 100 + 50, 0 * 100 + 70), 8)
+                pygame.blit.assert_any_call(font.render('rook', True, 'black'), (0 * 100 + 30, 0 * 100 + 70))
+                pygame.draw.line.assert_any_call(screen, 'red', (7 * 100 + 50, 0 * 100 + 70),
+                                                 (7 * 100 + 50, 0 * 100 + 70), 2)
+
+            def test_check_promotion(self):
+                white_promotion, black_promotion, promote_index = check_promotion()
+                self.assertEqual(white_promotion, False)
+                self.assertEqual(black_promotion, False)
+                self.assertEqual(promote_index, 100)
+
+            def test_draw_promotion(self):
+                draw_promotion()
+                pygame.draw.rect.assert_called_once_with(screen, 'dark gray', [800, 0, 200, 420])
+                pygame.draw.rect.assert_called_once_with(screen, 'red', [800, 0, 200, 420], 8)
+
 
 if __name__ == '__main__':
     unittest.main()
