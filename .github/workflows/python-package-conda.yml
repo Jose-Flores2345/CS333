@@ -1,0 +1,43 @@
+name: Python Package using Conda
+
+on: [push]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.10'
+    - name: Set up Conda
+      run: |
+        echo "deb [signed-by=/usr/share/keyrings/conda-archive-keyring.gpg] https://repo.anaconda.com/pkgs/misc/debrepo/conda stable main" | sudo tee /etc/apt/sources.list.d/conda.list
+        sudo apt update
+        sudo apt install conda
+        echo $CONDA/bin >> $GITHUB_PATH
+    - name: Install dependencies
+      run: |
+        conda create -n chess-env python=3.10 -y
+        source activate chess-env
+        conda install -c conda-forge pygame -y
+    - name: Lint with flake8
+      run: |
+        source activate chess-env
+        conda install flake8 -y
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        source activate chess-env
+        conda install pytest -y
+        pytest
+    - name: Deploy to Production
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "Deploying to production environment"
+        # Add deployment commands here. This might involve SCP, SSH, or other deployment mechanisms.
