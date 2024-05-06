@@ -36,8 +36,14 @@ jobs:
         source activate chess-env
         conda install pytest -y
         pytest
+  
+      continue-on-error: false
+    - name: Build and Package
+      run: |
+        echo "Building and packaging the application"
+        # Add your packaging script or command here. This could involve PyInstaller or similar tools.
     - name: Deploy to Production
       if: github.ref == 'refs/heads/main'
       run: |
         echo "Deploying to production environment"
-        # Add deployment commands here. This might involve SCP, SSH, or other deployment mechanisms.
+        # Add your deployment commands here, such as SCP, SSH, or API calls to cloud services.
