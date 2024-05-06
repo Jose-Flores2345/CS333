@@ -9,31 +9,50 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: conda-incubator/setup-miniconda@v2
+    - name: Setup Miniconda
+      uses: conda-incubator/setup-miniconda@v2
       with:
         activate-environment: chess-env
         python-version: 3.10
         auto-activate-base: false
 
-    - name: Install dependencies
+    - name: Initialize Conda
       run: |
-        conda install -c conda-forge pygame -y
-        conda install -c conda-forge pyinstaller -y
-        conda install -c conda-forge flake8 -y
-        conda install -c conda-forge pytest -y
+        echo "Initializing Conda..."
+        conda init bash
+        source ~/miniconda/etc/profile.d/conda.sh
+        conda activate chess-env
+
+    - name: Install Pygame
+      run: |
+        echo "Installing Pygame..."
+        conda install -c conda-forge pygame -y --verbose
+
+    - name: Install PyInstaller
+      run: |
+        echo "Installing PyInstaller..."
+        conda install -c conda-forge pyinstaller -y --verbose
+
+    - name: Install Flake8 and Pytest
+      run: |
+        echo "Installing Flake8 and Pytest..."
+        conda install -c conda-forge flake8 pytest -y --verbose
 
     - name: Lint with flake8
       run: |
+        echo "Running Flake8 linting..."
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
     - name: Run tests
       run: |
+        echo "Running tests with Pytest..."
         pytest
-      continue-on-error: false # Stops the workflow if tests fail
+      continue-on-error: false 
 
     - name: Build Executable with PyInstaller
       run: |
+        echo "Building executable with PyInstaller..."
         pyinstaller --onefile main.py -n ChessGameExecutable
 
     - name: Upload Executable as Artifact
