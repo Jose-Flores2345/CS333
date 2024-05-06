@@ -1,45 +1,40 @@
-name: Build and Test Python Application
+name: Python CI with Executable Packaging
 
 on: [push]
 
 jobs:
-  build-and-test:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.10'
 
-    - name: Set up Conda
-      run: |
-        echo "deb [signed-by=/usr/share/keyrings/conda-archive-keyring.gpg] https://repo.anaconda.com/pkgs/misc/debrepo/conda stable main" | sudo tee /etc/apt/sources.list.d/conda.list
-        sudo apt update
-        sudo apt install conda
-        echo $CONDA/bin >> $GITHUB_PATH
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: chess-env
+        python-version: 3.10
+        auto-activate-base: false
 
     - name: Install dependencies
       run: |
-        conda create -n chess-env python=3.10 -y
-        source activate chess-env
-        conda install -c conda-forge pygame -y
+        conda install -c conda-forge pygame pyinstaller flake8 pytest
 
     - name: Lint with flake8
       run: |
-        source activate chess-env
-        conda install flake8 -y
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
     - name: Run tests
       run: |
-        source activate chess-env
-        conda install pytest -y
         pytest
+      continue-on-error: false 
 
-    - name: Optional Deployment or Packaging Steps
+    - name: Build Executable with PyInstaller
       run: |
-        echo "Run deployment scripts or packaging commands"
-        
+        pyinstaller --onefile main.py -n ChessGameExecutable
+
+    - name: Upload Executable as Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: chess-game-executable
+        path: dist/ChessGameExecutable
