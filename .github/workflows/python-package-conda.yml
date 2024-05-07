@@ -5,12 +5,14 @@ on: [push]
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: cs333 
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Check directory structure
+      run: |
+        pwd
+        ls -alh
 
     - name: Set up Python
       uses: actions/setup-python@v3
@@ -33,8 +35,8 @@ jobs:
 
     - name: Run Tests
       run: |
-        pytest -v test.py
-      continue-on-error: false  
+        pytest -v ./test.py
+      continue-on-error: false 
 
     - name: Build Executable with PyInstaller
       run: |
