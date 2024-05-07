@@ -30,8 +30,8 @@ jobs:
 
     - name: Run Tests
       run: |
-        pytest -v ./cs333/test.py
-      continue-on-error: false  # Stops the workflow if tests fail
+        pytest -v test.py
+      continue-on-error: false  
 
     - name: Build Executable with PyInstaller
       run: |
