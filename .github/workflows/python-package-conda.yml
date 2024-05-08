@@ -35,7 +35,7 @@ jobs:
 
     - name: Run Tests
       run: |
-        pytest -vv ./home/runner/work/CS333/test.py
+        pytest -vv ./test.py
 
       continue-on-error: false 
 
